@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Interactivo: Proyecto FCT ValoraClick</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 40vh; max-height: 400px; min-height: 300px; }
+        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+        .tab-active { border-bottom: 2px solid #0284c7; color: #0284c7; font-weight: 600; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .team-card:hover { transform: translateY(-5px); transition: transform 0.3s ease; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="antialiased selection:bg-sky-200 selection:text-sky-900">
+
+<!-- Chosen Palette: Slate Backgrounds (#f8fafc), Sky Blue for React (#0284c7, #38bdf8), Emerald for Spring/Mongo (#10b981), Rose for Problem (#e11d48) -->
+
+<!-- Application Structure Plan: The SPA follows the requested 'Project Briefing Dashboard' structure. It starts with Context (Problem vs Solution), details the MVP (Data, Roles, UI), maps out the 4 Squads to the requested Tech Stack (React + Spring Boot + MongoDB), and ends with a detailed parallel 12-week timeline. This visual flow ensures the students understand the project context, their specific tools, and how their squad interacts with others without blocking development. -->
+
+<!-- Visualization & Content Choices:
+     1. Context Toggle Cards -> Goal: Compare -> Show the shift from manual Google Forms to the ValoraClick platform.
+     2. MVP Scope Tabs -> Goal: Organize -> Breaks down NoSQL hierarchy, Roles, and UI features.
+     3. Role Access Matrix -> Radar Chart (Chart.js) -> Goal: Compare -> Demonstrates the permission levels of Admin, Teacher, and Student.
+     4. Tech Stack Grid -> Goal: Relationships -> Connects groups to React, Spring Boot, and MongoDB.
+     5. Timeline -> Doughnut Chart (Chart.js) + Phase Tabs -> Goal: Inform -> Shows the 12-week breakdown and parallel tasks.
+     Libraries: Vanilla JS for interactions, Chart.js for charts. -->
+
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<nav class="sticky top-0 z-50 glass-panel border-b border-slate-200 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <span class="text-2xl">📱</span>
+            <h1 class="text-xl font-bold text-slate-800 tracking-tight">FCT DAM <span class="text-sky-600 font-light">| ValoraClick</span></h1>
+        </div>
+        <div class="hidden md:flex space-x-6 text-sm font-medium text-slate-600">
+            <button onclick="scrollToSection('contexto')" class="hover:text-sky-600 transition-colors">El Contexto</button>
+            <button onclick="scrollToSection('arquitectura')" class="hover:text-sky-600 transition-colors">MVP y Datos</button>
+            <button onclick="scrollToSection('equipos')" class="hover:text-sky-600 transition-colors">Equipos & Stack</button>
+            <button onclick="scrollToSection('cronograma')" class="hover:text-sky-600 transition-colors">Cronograma</button>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+
+    <section id="contexto" class="pt-8">
+        <div class="text-center mb-12">
+            <div class="inline-block bg-sky-100 text-sky-800 px-4 py-1.5 rounded-full text-xs font-bold tracking-widest mb-4 uppercase shadow-sm border border-sky-200">Contexto del Proyecto</div>
+            <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-6">Misión: <span class="text-sky-600">Encuestas Académicas Inteligentes</span></h2>
+
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 max-w-4xl mx-auto text-left mb-10">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 flex items-center"><span class="text-2xl mr-2">🏫</span> El Escenario Real</h3>
+                <p class="text-lg text-slate-600 mb-4 leading-relaxed">
+                    En la mayoría de centros educativos, la evaluación de la satisfacción del alumnado se hace de forma puntual mediante <strong>papel o formularios aislados</strong> (ej. Google Forms). No hay estructura común, ni histórico, ni control de accesos.
+                </p>
+                <p class="text-lg text-slate-600 leading-relaxed">
+                    Durante estas 12 semanas, desarrollaréis <strong>ValoraClick</strong>, una plataforma multicentro moderna para generar encuestas, acceder vía códigos QR y consolidar estadísticas en tiempo real.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="glass-panel p-8 rounded-2xl border-l-4 border-l-rose-500 hover:shadow-lg transition-shadow cursor-pointer" onclick="toggleProblemDetail()">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-2xl font-bold text-slate-800 flex items-center">❌ El Pasado: Datos Dispersos</h3>
+                    <span class="text-3xl">📄</span>
+                </div>
+                <ul class="space-y-3 text-slate-600 mb-4">
+                    <li class="flex items-start"><span class="mr-2">⚠️</span> Formularios aislados sin histórico consolidado.</li>
+                    <li class="flex items-start"><span class="mr-2">⚠️</span> Imposibilidad de escalar a múltiples centros o cursos.</li>
+                    <li class="flex items-start"><span class="mr-2">⚠️</span> Resultados poco explotables para análisis longitudinal.</li>
+                </ul>
+                <div id="problemDetail" class="hidden mt-4 p-4 bg-rose-50 rounded-lg text-rose-800 text-sm border border-rose-100">
+                    <strong>Impacto crítico:</strong> Al no existir una base de datos estructurada, comparar la satisfacción entre el trimestre 1 y el trimestre 3, o entre distintos cursos, requiere horas de trabajo manual cruzando hojas de cálculo.
+                </div>
+                <button class="text-sm text-rose-600 font-semibold mt-2 underline decoration-dashed underline-offset-4">Ver impacto crítico</button>
+            </div>
+
+            <div class="glass-panel p-8 rounded-2xl border-l-4 border-l-sky-500 hover:shadow-lg transition-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-2xl font-bold text-slate-800 flex items-center">✅ El Futuro: ValoraClick</h3>
+                    <span class="text-3xl">🚀</span>
+                </div>
+                <ul class="space-y-3 text-slate-600 mb-4">
+                    <li class="flex items-start"><span class="mr-2">✔️</span> Plataforma web multicentro con backend robusto en Spring.</li>
+                    <li class="flex items-start"><span class="mr-2">✔️</span> Base de datos NoSQL (MongoDB) para máxima escalabilidad.</li>
+                    <li class="flex items-start"><span class="mr-2">✔️</span> Acceso instantáneo de alumnos mediante QR y exportación CSV.</li>
+                </ul>
+                <div class="mt-4 p-4 bg-sky-50 rounded-lg text-sky-800 text-sm border border-sky-100">
+                    <strong>Tu Misión:</strong> Diseñar un modelo de datos escalable, reglas de seguridad robustas y una App intuitiva preparada para futuras oleadas de desarrollo.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="arquitectura" class="scroll-mt-24 pt-8 border-t border-slate-200">
+        <div class="mb-10">
+            <h2 class="text-3xl font-bold text-slate-900 mb-2">Alcance Funcional (MVP)</h2>
+            <p class="text-slate-600">Requisitos mínimos viables que garantizan el funcionamiento de la plataforma en un entorno educativo multicentro.</p>
+        </div>
+
+        <div class="glass-panel rounded-2xl overflow-hidden">
+            <div class="flex border-b border-slate-200 bg-slate-50 flex-wrap sm:flex-nowrap">
+                <button class="w-full sm:flex-1 py-4 text-center font-medium text-slate-600 hover:bg-slate-100 transition-colors tab-active" id="tab-datos" onclick="switchTab('datos')">🗂️ Jerarquía NoSQL</button>
+                <button class="w-full sm:flex-1 py-4 text-center font-medium text-slate-600 hover:bg-slate-100 transition-colors" id="tab-roles" onclick="switchTab('roles')">👥 Usuarios y Roles</button>
+                <button class="w-full sm:flex-1 py-4 text-center font-medium text-slate-600 hover:bg-slate-100 transition-colors" id="tab-ui" onclick="switchTab('ui')">💻 Interfaz y Funciones</button>
+            </div>
+
+            <div class="p-8 min-h-[350px] flex items-center">
+                <!-- Data Hierarchy Tab -->
+                <div id="content-datos" class="w-full fade-in">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-4">Estructura Multicentro (MongoDB)</h3>
+                            <p class="text-sm text-slate-600 mb-4">La elección de MongoDB (Documentos NoSQL) es perfecta para soportar esta jerarquía altamente anidada y dinámica:</p>
+                            <ul class="space-y-2 text-slate-700 font-mono text-sm bg-slate-100 p-4 rounded-lg border border-slate-200">
+                                <li>📁 Centros Educativos</li>
+                                <li><span class="text-slate-400">└─</span> 📁 Niveles (FP, ESO)</li>
+                                <li><span class="text-slate-400">&nbsp;&nbsp;└─</span> 📁 Cursos (DAM, DAW)</li>
+                                <li><span class="text-slate-400">&nbsp;&nbsp;&nbsp;&nbsp;└─</span> 📁 Grupos (1º, 2º)</li>
+                                <li><span class="text-slate-400">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─</span> 📁 Asignaturas</li>
+                                <li><span class="text-slate-400">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─</span> 📄 <strong>Encuestas</strong> (Trimestrales)</li>
+                                <li><span class="text-slate-400">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─</span> 📄 Respuestas Anónimas</li>
+                            </ul>
+                        </div>
+                        <div class="flex justify-center flex-col items-center text-center p-6 bg-emerald-50 rounded-xl border border-emerald-200">
+                            <span class="text-5xl mb-3">🍃</span>
+                            <h4 class="font-bold text-emerald-800">Flexibilidad de Documentos</h4>
+                            <p class="text-sm text-emerald-700 mt-2">Con MongoDB y Spring Data, podréis gestionar encuestas con preguntas dinámicas sin tener que alterar el esquema de tablas tradicional constantemente.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roles Tab -->
+                <div id="content-roles" class="hidden w-full fade-in">
+                    <div class="grid lg:grid-cols-2 gap-8 items-center">
+                        <div class="space-y-4">
+                            <div class="p-4 rounded-lg border-l-4 border-indigo-500 bg-slate-50 cursor-pointer hover:bg-indigo-50 transition-colors" onclick="updateRadar(0)">
+                                <h4 class="font-bold text-slate-800">Administrador</h4>
+                                <p class="text-sm text-slate-600">Gestión global. Configura centros, cursos, ve todos los resultados consolidados y exporta CSV.</p>
+                            </div>
+                            <div class="p-4 rounded-lg border-l-4 border-teal-500 bg-slate-50 cursor-pointer hover:bg-teal-50 transition-colors" onclick="updateRadar(1)">
+                                <h4 class="font-bold text-slate-800">Profesor</h4>
+                                <p class="text-sm text-slate-600">Acceso limitado por Spring Security. Solo consulta resultados de sus asignaturas y genera los códigos QR.</p>
+                            </div>
+                            <div class="p-4 rounded-lg border-l-4 border-rose-400 bg-slate-50 cursor-pointer hover:bg-rose-50 transition-colors" onclick="updateRadar(2)">
+                                <h4 class="font-bold text-slate-800">Alumno</h4>
+                                <p class="text-sm text-slate-600">Acceso público/anónimo. Escanea el QR, responde la encuesta y envía los datos sin registrarse.</p>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-2 text-center">Haz clic en los roles para visualizar su matriz de permisos teórica.</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="rolesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UI Features Tab -->
+                <div id="content-ui" class="hidden w-full fade-in text-center">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6">Funcionalidades Clave (React UI)</h3>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-100 hover:border-sky-300 transition-colors">
+                            <div class="text-4xl mb-4">📱</div>
+                            <h4 class="font-bold text-slate-800 mb-2">Acceso por QR</h4>
+                            <p class="text-sm text-slate-600">El profesor genera un QR en la vista de React; el alumno escanea y accede directo a la encuesta activa.</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-100 hover:border-sky-300 transition-colors">
+                            <div class="text-4xl mb-4">📊</div>
+                            <h4 class="font-bold text-slate-800 mb-2">Estadísticas en Vivo</h4>
+                            <p class="text-sm text-slate-600">Dashboard con gráficos dinámicos filtrables por curso, trimestre y profesor.</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-100 hover:border-sky-300 transition-colors">
+                            <div class="text-4xl mb-4">📑</div>
+                            <h4 class="font-bold text-slate-800 mb-2">Exportación CSV</h4>
+                            <p class="text-sm text-slate-600">Generación de archivos CSV procesados desde el backend Spring para análisis externo profundo.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="equipos" class="scroll-mt-24 pt-8 border-t border-slate-200">
+        <div class="mb-10 text-center">
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">Organización de las 4 Squads</h2>
+            <p class="text-slate-600 max-w-2xl mx-auto">Trabajaréis en paralelo. El éxito radica en que el Grupo 1 y 2 fijen los contratos (JSON/API) pronto, para que el Grupo 3 y 4 puedan construir la web en React sin bloqueos.</p>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-4 mb-12">
+            <div class="team-card bg-white p-6 rounded-xl border-t-4 border-emerald-500 shadow-sm border border-slate-100" onmouseenter="highlightTech('mongodb')" onmouseleave="resetTech()">
+                <div class="text-xs font-bold text-emerald-600 tracking-wider mb-2 uppercase">Grupo 1</div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">Modelo de Datos</h3>
+                <p class="text-sm text-slate-600">Diseño de colecciones y documentos NoSQL en MongoDB. Gestión del histórico de encuestas.</p>
+                <div class="mt-4 inline-block bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">La Columna Vertebral</div>
+            </div>
+
+            <div class="team-card bg-white p-6 rounded-xl border-t-4 border-green-600 shadow-sm border border-slate-100" onmouseenter="highlightTech('spring')" onmouseleave="resetTech()">
+                <div class="text-xs font-bold text-green-600 tracking-wider mb-2 uppercase">Grupo 2</div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">Backend y Seguridad</h3>
+                <p class="text-sm text-slate-600">API REST en Spring Boot, autenticación (JWT), endpoints y lógica de negocio de exportación.</p>
+                <div class="mt-4 inline-block bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold">El Motor (API)</div>
+            </div>
+
+            <div class="team-card bg-white p-6 rounded-xl border-t-4 border-sky-500 shadow-sm border border-slate-100" onmouseenter="highlightTech('react')" onmouseleave="resetTech()">
+                <div class="text-xs font-bold text-sky-600 tracking-wider mb-2 uppercase">Grupo 3</div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">React UI / Paneles</h3>
+                <p class="text-sm text-slate-600">Navegación de la app, panel de administrador, vistas de login, formularios y diseño base de UI.</p>
+                <div class="mt-4 inline-block bg-sky-50 text-sky-700 px-3 py-1 rounded-full text-xs font-bold">La Cara Visible</div>
+            </div>
+
+            <div class="team-card bg-white p-6 rounded-xl border-t-4 border-indigo-500 shadow-sm border border-slate-100" onmouseenter="highlightTech('qa')" onmouseleave="resetTech()">
+                <div class="text-xs font-bold text-indigo-600 tracking-wider mb-2 uppercase">Grupo 4</div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">PO/QA</h3>
+                <p class="text-sm text-slate-600">Gestion de tareas, orquestacion entre equipo, definicion de encuestas, gráficos con Recharts/Chart.js, generación de QR y Testing QA funcional.</p>
+                <div class="mt-4 inline-block bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold">El Núcleo y Calidad</div>
+            </div>
+        </div>
+
+        <div class="glass-panel p-8 rounded-2xl flex flex-col items-center">
+            <h3 class="text-xl font-bold text-slate-800 mb-8">El Stack Tecnológico Moderno</h3>
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 w-full">
+
+                <div id="tech-react" class="text-center transition-all duration-300 transform grayscale opacity-60">
+                    <div class="w-24 h-24 mx-auto bg-white rounded-2xl shadow-md flex items-center justify-center border-2 border-sky-400 mb-3">
+                        <span class="text-4xl text-sky-400 font-bold tracking-tighter">Re</span>
+                    </div>
+                    <h4 class="font-bold text-slate-800">React</h4>
+                    <p class="text-xs text-slate-500 uppercase">Frontend Web SPA</p>
+                </div>
+
+                <div class="hidden md:block text-slate-300 text-3xl">↔</div>
+
+                <div id="tech-spring" class="text-center transition-all duration-300 transform grayscale opacity-60">
+                    <div class="w-24 h-24 mx-auto bg-white rounded-2xl shadow-md flex items-center justify-center border-2 border-green-500 mb-3 relative">
+                        <span class="text-4xl text-green-500 font-bold tracking-tighter">Sp</span>
+                    </div>
+                    <h4 class="font-bold text-slate-800">Java + Spring Boot</h4>
+                    <p class="text-xs text-slate-500 uppercase">Backend API REST</p>
+                </div>
+
+                <div class="hidden md:block text-slate-300 text-3xl">↔</div>
+
+                <div id="tech-mongodb" class="text-center transition-all duration-300 transform grayscale opacity-60">
+                    <div class="w-24 h-24 mx-auto bg-white rounded-2xl shadow-md flex items-center justify-center border-2 border-emerald-600 mb-3">
+                        <span class="text-4xl text-emerald-600 font-bold tracking-tighter">MDB</span>
+                    </div>
+                    <h4 class="font-bold text-slate-800">MongoDB</h4>
+                    <p class="text-xs text-slate-500 uppercase">Persistencia NoSQL</p>
+                </div>
+
+            </div>
+            <p class="text-sm text-slate-400 mt-8">Pasa el ratón por las tarjetas de las squads arriba para ver sus tecnologías principales asociadas.</p>
+        </div>
+    </section>
+
+    <section id="cronograma" class="scroll-mt-24 pt-8 border-t border-slate-200">
+        <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
+            <div>
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Cronograma Global: 12 Semanas</h2>
+                <p class="text-slate-600 mb-8">El proyecto se divide en 4 fases orientadas a una entrega de valor metodológica y evitar bloqueos entre equipos.</p>
+
+                <div class="space-y-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 border-2 border-sky-500 z-10">F1</div>
+                        <div class="ml-4 pb-6 border-l-2 border-slate-200 pl-4 relative -left-10 left-offset-adjust">
+                            <h4 class="text-lg font-bold text-slate-800">Análisis y Diseño Global <span class="text-sm font-normal text-slate-500 ml-2">(Semanas 1-2)</span></h4>
+                            <p class="text-sm text-slate-600 mt-1">Estructura MongoDB, Wireframes de React, y contratos JSON (Swagger) de la API de Spring definidos.</p>
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 border-2 border-emerald-500 z-10">F2</div>
+                        <div class="ml-4 pb-6 border-l-2 border-slate-200 pl-4 relative -left-10 left-offset-adjust">
+                            <h4 class="text-lg font-bold text-slate-800">Construcción del Core <span class="text-sm font-normal text-slate-500 ml-2">(Semanas 3-6)</span></h4>
+                            <p class="text-sm text-slate-600 mt-1">BD poblada, endpoints Spring respondiendo, Login React activo, QR generado y encuestas visibles.</p>
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600 border-2 border-indigo-500 z-10">F3</div>
+                        <div class="ml-4 pb-6 border-l-2 border-slate-200 pl-4 relative -left-10 left-offset-adjust">
+                            <h4 class="text-lg font-bold text-slate-800">Integración y Mejoras <span class="text-sm font-normal text-slate-500 ml-2">(Semanas 7-9)</span></h4>
+                            <p class="text-sm text-slate-600 mt-1">Seguridad real (JWT roles), gráficos operativos, exportación CSV desde backend y UX refinada.</p>
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold z-10 shadow-md">F4</div>
+                        <div class="ml-4 pl-4 relative -left-10 left-offset-adjust">
+                            <h4 class="text-lg font-bold text-slate-800">Estabilización y Cierre <span class="text-sm font-normal text-slate-500 ml-2">(Semanas 10-12)</span></h4>
+                            <p class="text-sm text-slate-600 mt-1">Documentación técnica, pruebas E2E finales, manuales de usuario y presentación formal.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-2xl flex flex-col h-full justify-center">
+                <h3 class="text-center font-bold text-slate-800 mb-2">Distribución de Tiempo</h3>
+                <div class="chart-container flex-1">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Parallel Planning -->
+        <div class="mt-8">
+            <h3 class="text-2xl font-bold text-slate-800 mb-6 text-center">Planificación Detallada Paralela (Squads)</h3>
+            <p class="text-slate-600 text-center max-w-3xl mx-auto mb-8">
+                El secreto de trabajar 20 personas es que en la Fase 1 defináis "contratos" (ej. cómo será el JSON de respuesta). Así, React puede usar datos falsos (Mocks) mientras Spring Boot y Mongo construyen la realidad por debajo.
+            </p>
+
+            <div class="glass-panel rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+                <div class="flex overflow-x-auto border-b border-slate-200 bg-slate-50 scrollbar-hide">
+                    <button class="flex-1 min-w-[120px] py-4 text-center font-medium text-slate-600 hover:bg-slate-100 transition-colors tab-active" id="tab-f1" onclick="switchPhase('f1')">Fase 1: Análisis</button>
+                    <button class="flex-1 min-w-[120px] py-4 text-center font-medium text-slate-600 hover:bg-slate-100 transition-colors" id="tab-f2" onclick="switchPhase('f2')">Fase 2: Core</button>
+                    <button class="flex-1 min-w-[120px] py-4 text-center font-medium text-slate-600 hover:bg-slate-100 transition-colors" id="tab-f3" onclick="switchPhase('f3')">Fase 3: Integración</button>
+                    <button class="flex-1 min-w-[120px] py-4 text-center font-medium text-slate-600 hover:bg-slate-100 transition-colors" id="tab-f4" onclick="switchPhase('f4')">Fase 4: Cierre</button>
+                </div>
+
+                <div class="p-6 md:p-8 bg-white min-h-[400px]">
+                    <!-- Phase 1 Content -->
+                    <div id="content-f1" class="phase-content fade-in">
+                        <h4 class="text-lg font-bold text-sky-700 mb-6 border-b pb-2">Semanas 1-2: Acordar contratos y diseños</h4>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                                <h5 class="font-bold text-emerald-800 mb-2 border-b border-emerald-200 pb-1">🗄️ BBDD (Mongo)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Diseño del esquema de colecciones y documentos.</li>
+                                    <li>Definición de jerarquías (Centros > Cursos).</li>
+                                    <li>Crear scripts JSON de datos iniciales.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-xl border border-green-200">
+                                <h5 class="font-bold text-green-800 mb-2 border-b border-green-300 pb-1">⚙️ Backend (Spring)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Diseño de API REST (Swagger).</li>
+                                    <li>Setup del proyecto Spring Boot y Maven.</li>
+                                    <li>Entregar contratos JSON a Frontend.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-sky-50 p-4 rounded-xl border border-sky-100">
+                                <h5 class="font-bold text-sky-800 mb-2 border-b border-sky-200 pb-1">🖥️ Frontend (React)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Wireframes UI/UX de la intranet.</li>
+                                    <li>Crear proyecto Vite/CRA React.</li>
+                                    <li>Crear Mocks basados en los contratos de Spring.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                                <h5 class="font-bold text-indigo-800 mb-2 border-b border-indigo-200 pb-1">📋 PO/QA/Encuestas</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Análisis del flujo del alumno (QR -> Encuesta).</li>
+                                    <li>Preparar tableros Trello/Jira.</li>
+                                    <li>Definir la matriz de roles y permisos.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase 2 Content -->
+                    <div id="content-f2" class="phase-content hidden fade-in">
+                        <h4 class="text-lg font-bold text-sky-700 mb-6 border-b pb-2">Semanas 3-6: Construcción de módulos autónomos</h4>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                                <h5 class="font-bold text-emerald-800 mb-2 border-b border-emerald-200 pb-1">🗄️ BBDD (Mongo)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Despliegue local/Atlas de la base.</li>
+                                    <li>Poblado masivo de datos falsos de colegios.</li>
+                                    <li>Primeras "Aggregation pipelines" de prueba.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-xl border border-green-200">
+                                <h5 class="font-bold text-green-800 mb-2 border-b border-green-300 pb-1">⚙️ Backend (Spring)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>CRUDs de Centros, Cursos y Usuarios.</li>
+                                    <li>Conexión con Mongo Data.</li>
+                                    <li>Autenticación base y generación de JWT.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-sky-50 p-4 rounded-xl border border-sky-100">
+                                <h5 class="font-bold text-sky-800 mb-2 border-b border-sky-200 pb-1">🖥️ Frontend (React)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Maquetar pantallas (Login, Admin Dashboard).</li>
+                                    <li>Desarrollar componentes visuales.</li>
+                                    <li>Usar Axios con datos Mocks (falsos).</li>
+                                </ul>
+                            </div>
+                            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                                <h5 class="font-bold text-indigo-800 mb-2 border-b border-indigo-200 pb-1">📋 PO/QA/Encuestas</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Desarrollar lógica de generación QR en Front.</li>
+                                    <li>Maquetar la vista pública de encuesta.</li>
+                                    <li>Pruebas de API con Postman.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase 3 Content -->
+                    <div id="content-f3" class="phase-content hidden fade-in">
+                        <h4 class="text-lg font-bold text-sky-700 mb-6 border-b pb-2">Semanas 7-9: Conexión, estadísticas y pulido</h4>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                                <h5 class="font-bold text-emerald-800 mb-2 border-b border-emerald-200 pb-1">🗄️ BBDD (Mongo)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Optimizar índices de búsqueda.</li>
+                                    <li>Cálculo de medias desde la propia base de datos.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-xl border border-green-200">
+                                <h5 class="font-bold text-green-800 mb-2 border-b border-green-300 pb-1">⚙️ Backend (Spring)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Proteger endpoints según Rol y Centro.</li>
+                                    <li>Crear generador de CSV y estadísticas consolidadas.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-sky-50 p-4 rounded-xl border border-sky-100">
+                                <h5 class="font-bold text-sky-800 mb-2 border-b border-sky-200 pb-1">🖥️ Frontend (React)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li><strong>Eliminar Mocks.</strong> Enganchar React con Spring real.</li>
+                                    <li>Gestión de estados (Loaders, Toasts de éxito).</li>
+                                </ul>
+                            </div>
+                            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                                <h5 class="font-bold text-indigo-800 mb-2 border-b border-indigo-200 pb-1">📋 PO/QA/Encuestas</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Integrar librerías de gráficos (Chart.js/Recharts).</li>
+                                    <li>Pruebas End-to-End (E2E). Intentar romper el sistema de roles.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase 4 Content -->
+                    <div id="content-f4" class="phase-content hidden fade-in">
+                        <h4 class="text-lg font-bold text-sky-700 mb-6 border-b pb-2">Semanas 10-12: Empaquetado y Cierre</h4>
+                        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                                <h5 class="font-bold text-emerald-800 mb-2 border-b border-emerald-200 pb-1">🗄️ BBDD (Mongo)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Limpieza de documentos "basura" de las pruebas.</li>
+                                    <li>Diccionario de datos NoSQL finalizado.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-xl border border-green-200">
+                                <h5 class="font-bold text-green-800 mb-2 border-b border-green-300 pb-1">⚙️ Backend (Spring)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Limpieza de código y logs.</li>
+                                    <li>Documentación de API entregada y generacion del JAR.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-sky-50 p-4 rounded-xl border border-sky-100">
+                                <h5 class="font-bold text-sky-800 mb-2 border-b border-sky-200 pb-1">🖥️ Frontend (React)</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Build optimizado de React preparado para servir.</li>
+                                    <li>Solución de warnings en consola y responsive checks.</li>
+                                </ul>
+                            </div>
+                            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                                <h5 class="font-bold text-indigo-800 mb-2 border-b border-indigo-200 pb-1">📋 PO/QA/Encuestas</h5>
+                                <ul class="text-sm text-slate-700 space-y-2 list-disc pl-4">
+                                    <li>Manuales de usuario creados.</li>
+                                    <li>Presentación final ensayada.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-12 border-t border-slate-200">
+        <div class="bg-slate-800 rounded-3xl p-8 md:p-12 text-center shadow-xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 text-9xl opacity-5 text-white">⚙️</div>
+            <h2 class="text-3xl font-bold text-white mb-6 relative z-10">Filosofía de Trabajo: Oleadas</h2>
+            <p class="text-slate-300 max-w-3xl mx-auto mb-10 text-lg relative z-10">
+                Vosotros sois la <strong>Oleada 1</strong>. El objetivo no es hacer 1.000 funcionalidades a medias, sino dejar unos cimientos técnicos excelentes con React y Spring para la siguiente promoción.
+            </p>
+
+            <div class="grid md:grid-cols-3 gap-6 relative z-10">
+                <div class="bg-slate-700/50 p-6 rounded-xl border border-slate-600 backdrop-blur-sm">
+                    <div class="text-3xl mb-3">🏛️</div>
+                    <h4 class="font-bold text-white mb-2">Diseño y API son Ley</h4>
+                    <p class="text-sm text-slate-300">Cualquier cambio estructural en Mongo o en las rutas de Spring debe ser debatido y aprobado por todos.</p>
+                </div>
+                <div class="bg-slate-700/50 p-6 rounded-xl border border-slate-600 backdrop-blur-sm">
+                    <div class="text-3xl mb-3">💎</div>
+                    <h4 class="font-bold text-white mb-2">Calidad > Cantidad</h4>
+                    <p class="text-sm text-slate-300">Un módulo de encuestas y CSV perfecto vale más que añadir notificaciones rotas o chats a medias.</p>
+                </div>
+                <div class="bg-slate-700/50 p-6 rounded-xl border border-slate-600 backdrop-blur-sm">
+                    <div class="text-3xl mb-3">🗣️</div>
+                    <h4 class="font-bold text-white mb-2">Comunicación Diaria</h4>
+                    <p class="text-sm text-slate-300">Si Spring Boot cambia una respuesta JSON, React dejará de funcionar. Hablad a diario.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="bg-slate-900 text-slate-400 py-8 text-center text-sm">
+    <p>Documentación Interactiva FCT - Proyecto ValoraClick</p>
+</footer>
+
+<style>
+    .left-offset-adjust { left: -1rem; }
+    @media (min-width: 768px) { .left-offset-adjust { left: 0; } }
+</style>
+
+<script>
+    // --- Navigation Logic ---
+    function scrollToSection(id) {
+        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- Problem Detail Toggle ---
+    function toggleProblemDetail() {
+        const detail = document.getElementById('problemDetail');
+        detail.classList.toggle('hidden');
+        detail.classList.add('fade-in');
+    }
+
+    // --- MVP Tabs Logic ---
+    function switchTab(tabId) {
+        ['datos', 'roles', 'ui'].forEach(id => {
+            document.getElementById('tab-' + id).classList.remove('tab-active');
+            document.getElementById('content-' + id).classList.add('hidden');
+        });
+        document.getElementById('tab-' + tabId).classList.add('tab-active');
+
+        const content = document.getElementById('content-' + tabId);
+        content.classList.remove('hidden');
+
+        if (tabId === 'roles' && rolesRadarChart === null) {
+            initRolesChart();
+        }
+    }
+
+    // --- Phase Tabs Logic (Detailed Planning) ---
+    function switchPhase(phaseId) {
+        ['f1', 'f2', 'f3', 'f4'].forEach(id => {
+            document.getElementById('tab-' + id).classList.remove('tab-active');
+            document.getElementById('content-' + id).classList.add('hidden');
+        });
+        document.getElementById('tab-' + phaseId).classList.add('tab-active');
+
+        const content = document.getElementById('content-' + phaseId);
+        content.classList.remove('hidden');
+    }
+
+    // --- Tech Stack Hover Logic ---
+    function highlightTech(techId) {
+        resetTech();
+
+        if (techId === 'mongodb') {
+            document.getElementById('tech-mongodb').classList.remove('grayscale', 'opacity-60');
+            document.getElementById('tech-mongodb').classList.add('scale-110');
+        } else if (techId === 'spring') {
+            document.getElementById('tech-spring').classList.remove('grayscale', 'opacity-60');
+            document.getElementById('tech-spring').classList.add('scale-110');
+        } else if (techId === 'react') {
+            document.getElementById('tech-react').classList.remove('grayscale', 'opacity-60');
+            document.getElementById('tech-react').classList.add('scale-110');
+        } else if (techId === 'qa') {
+            // QA applies to Front/Back interactions
+            document.getElementById('tech-spring').classList.remove('grayscale', 'opacity-60');
+            document.getElementById('tech-react').classList.remove('grayscale', 'opacity-60');
+        }
+    }
+
+    function resetTech() {
+        ['tech-mongodb', 'tech-spring', 'tech-react'].forEach(id => {
+            const el = document.getElementById(id);
+            el.classList.add('grayscale', 'opacity-60');
+            el.classList.remove('scale-110');
+        });
+    }
+
+    // --- Chart.js Initializations ---
+
+    // Chart 1: Timeline Doughnut
+    const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
+    new Chart(ctxTimeline, {
+        type: 'doughnut',
+        data: {
+            labels: ['F1: Análisis (2 sem)', 'F2: Core (4 sem)', 'F3: Integración (3 sem)', 'F4: Cierre (3 sem)'],
+            datasets: [{
+                data: [2, 4, 3, 3],
+                backgroundColor: [
+                    '#0284c7', // Sky 600
+                    '#10b981', // Emerald 500
+                    '#f59e0b', // Amber 500
+                    '#0f172a'  // Slate 900
+                ],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 20, font: { family: 'Inter' }, color: '#475569' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ' ' + context.label.split(' (')[0] + ': ' + context.raw + ' semanas';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Chart 2: Roles Radar Matrix
+    let rolesRadarChart = null;
+    // Permisos ValoraClick
+    const roleDataSets = [
+        { // Admin
+            label: 'Administrador',
+            data: [100, 100, 100, 100, 0], // Gestión Centros, Crear Encuestas, Ver Resultados Global, Exportar CSV, Responder Anónimo
+            backgroundColor: 'rgba(99, 102, 241, 0.2)',
+            borderColor: '#6366f1',
+            pointBackgroundColor: '#6366f1'
+        },
+        { // Profesor
+            label: 'Profesor',
+            data: [0, 100, 50, 0, 0], // Nada de centros, Crea QR, Ve Resultados Propios, No exporta, No responde anónimo
+            backgroundColor: 'rgba(20, 184, 166, 0.2)',
+            borderColor: '#14b8a6',
+            pointBackgroundColor: '#14b8a6'
+        },
+        { // Alumno
+            label: 'Alumno (Vía QR)',
+            data: [0, 0, 0, 0, 100], // Solo envía respuestas.
+            backgroundColor: 'rgba(244, 63, 94, 0.2)',
+            borderColor: '#f43f5e',
+            pointBackgroundColor: '#f43f5e'
+        }
+    ];
+
+    function initRolesChart() {
+        const ctxRoles = document.getElementById('rolesChart').getContext('2d');
+        rolesRadarChart = new Chart(ctxRoles, {
+            type: 'radar',
+            data: {
+                labels: ['Gestión Centros', 'Crear QR/Encuesta', 'Resultados', 'Exportar CSV', 'Responder'],
+                datasets: roleDataSets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(0,0,0,0.05)' },
+                        grid: { color: 'rgba(0,0,0,0.05)' },
+                        pointLabels: { font: { family: 'Inter', size: 11 }, color: '#475569' },
+                        ticks: { display: false, max: 100, min: 0 }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: 'Inter', size: 12 } } }
+                }
+            }
+        });
+    }
+
+    // Dynamic update function for Radar Chart
+    function updateRadar(roleIndex) {
+        if(!rolesRadarChart) return;
+
+        const newDatasets = roleDataSets.map((ds, index) => {
+            const clone = JSON.parse(JSON.stringify(ds));
+            if (index !== roleIndex) {
+                clone.backgroundColor = 'rgba(0,0,0,0.02)';
+                clone.borderColor = 'rgba(0,0,0,0.1)';
+                clone.pointBackgroundColor = 'rgba(0,0,0,0.1)';
+            }
+            return clone;
+        });
+
+        rolesRadarChart.data.datasets = newDatasets;
+        rolesRadarChart.update();
+
+        setTimeout(() => {
+            if(rolesRadarChart) {
+                rolesRadarChart.data.datasets = roleDataSets;
+                rolesRadarChart.update();
+            }
+        }, 3000);
+    }
+
+</script>
+</body>
+</html>

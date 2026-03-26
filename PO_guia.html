@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual del Product Owner - FCT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        gray: { 850: '#1f2937', 900: '#111827', 950: '#030712', }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #030712; color: #f9fafb; scroll-behavior: smooth; }
+        .glass-card {
+            background: linear-gradient(145deg, rgba(31, 41, 55, 0.7) 0%, rgba(17, 24, 39, 0.9) 100%);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            backdrop-filter: blur(10px);
+        }
+        .kanban-col {
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px dashed rgba(75, 85, 99, 0.5);
+            border-radius: 0.75rem;
+        }
+        .kanban-card {
+            background: #1f2937;
+            border-left: 4px solid #8b5cf6;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+            cursor: grab;
+        }
+        .kanban-card:hover { transform: translateY(-2px); }
+        .nav-btn { transition: all 0.3s ease; }
+        .nav-btn.active { color: #a855f7; border-bottom: 2px solid #a855f7; }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #a855f7, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-purple-500 selection:text-white">
+
+<!-- Application Structure Plan: This SPA serves as an interactive manual for the Product Owner role in the FCT projects. It is structured into 3 logical sections: 1. The Role (What does a PO do?), 2. User Stories (How to write them, with an interactive good/bad comparison), 3. Project Management (Kanban visualization and ceremonies). This structure provides a step-by-step onboarding for students taking on agile management responsibilities. -->
+
+<!-- Visualization & Content Choices:
+     1. Interactive Formula -> Goal: Inform -> Highlights the 3 parts of a User Story (As a, I want, So that).
+     2. Good vs Bad US Tabs -> Goal: Compare -> Shows students the difference between technical tasks and true user-centric stories.
+     3. CSS Kanban Board -> Goal: Organize/Inform -> Visually represents Trello/Jira columns to explain workflow states.
+     4. Ceremonies Grid -> Goal: Organize -> Breaks down Daily, Planning, Review, Retro using cards.
+     Libraries: Vanilla JS for tab switching. NO SVG/Mermaid used. -->
+
+<!-- Header -->
+<header class="border-b border-gray-800 bg-gray-950 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-chess-knight text-purple-500 text-2xl"></i>
+            <h1 class="text-xl font-display font-bold tracking-tight">Manual <span class="text-purple-500 font-light">Product Owner</span></h1>
+        </div>
+        <nav class="flex gap-6 text-sm font-medium text-gray-400">
+            <a href="#el-rol" class="hover:text-purple-400 transition-colors">El Rol</a>
+            <a href="#historias" class="hover:text-purple-400 transition-colors">Historias de Usuario</a>
+            <a href="#gestion" class="hover:text-purple-400 transition-colors">Gestión Ágil</a>
+            <a href="#ceremonias" class="hover:text-purple-400 transition-colors">Ceremonias</a>
+        </nav>
+    </div>
+</header>
+
+<main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full space-y-20">
+
+    <!-- Section 1: El Rol -->
+    <section id="el-rol" class="fade-in scroll-mt-24">
+        <div class="text-center max-w-3xl mx-auto mb-10">
+            <h2 class="text-4xl md:text-5xl font-display font-bold mb-6 text-white">El dueño del <span class="gradient-text">Producto</span></h2>
+            <p class="text-lg text-gray-400 leading-relaxed">
+                El Product Owner (PO) es la voz del cliente dentro del equipo de desarrollo. Tu objetivo no es programar, sino <strong>maximizar el valor del producto</strong> decidiendo <em>qué</em> se debe hacer y en qué orden.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="glass-card p-8 rounded-2xl border-t-4 border-t-purple-500">
+                <div class="text-3xl mb-4 text-purple-400"><i class="fa-solid fa-list-check"></i></div>
+                <h3 class="text-xl font-bold text-white mb-2">Gestionar el Backlog</h3>
+                <p class="text-sm text-gray-400">Crear, mantener y priorizar la lista de tareas (Product Backlog). Eres el único responsable de decidir qué historia de usuario es más importante.</p>
+            </div>
+            <div class="glass-card p-8 rounded-2xl border-t-4 border-t-blue-500">
+                <div class="text-3xl mb-4 text-blue-400"><i class="fa-solid fa-comments"></i></div>
+                <h3 class="text-xl font-bold text-white mb-2">Aclarar Dudas</h3>
+                <p class="text-sm text-gray-400">Asegurarte de que el equipo de desarrollo (Backend, Frontend, BD) entiende perfectamente cada tarea. Si no está claro, es responsabilidad tuya detallarlo.</p>
+            </div>
+            <div class="glass-card p-8 rounded-2xl border-t-4 border-t-emerald-500">
+                <div class="text-3xl mb-4 text-emerald-400"><i class="fa-solid fa-check-double"></i></div>
+                <h3 class="text-xl font-bold text-white mb-2">Aceptar Entregas</h3>
+                <p class="text-sm text-gray-400">Revisar el trabajo terminado por los programadores y decidir si cumple con los <em>Criterios de Aceptación</em> antes de darlo por finalizado.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Historias de Usuario -->
+    <section id="historias" class="pt-10 border-t border-gray-800 scroll-mt-24">
+        <h2 class="text-3xl font-display font-bold text-white mb-2">Cómo escribir Historias de Usuario (US)</h2>
+        <p class="text-gray-400 mb-10 max-w-3xl">Una Historia de Usuario no es una descripción técnica. Es una explicación corta y sencilla de una funcionalidad contada desde la perspectiva de la persona que desea esa nueva capacidad.</p>
+
+        <div class="grid lg:grid-cols-2 gap-10 items-start">
+            <!-- La Fórmula -->
+            <div class="glass-card p-8 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-2">La Fórmula Mágica</h3>
+
+                <div class="space-y-4 font-mono text-sm md:text-base">
+                    <div class="p-4 bg-gray-900 rounded-lg border border-purple-500/30 flex items-center">
+                        <span class="text-purple-400 font-bold w-28 shrink-0">Como...</span>
+                        <span class="text-gray-300">[perfil / rol del usuario]</span>
+                    </div>
+                    <div class="p-4 bg-gray-900 rounded-lg border border-blue-500/30 flex items-center">
+                        <span class="text-blue-400 font-bold w-28 shrink-0">Quiero...</span>
+                        <span class="text-gray-300">[acción o funcionalidad]</span>
+                    </div>
+                    <div class="p-4 bg-gray-900 rounded-lg border border-emerald-500/30 flex items-center">
+                        <span class="text-emerald-400 font-bold w-28 shrink-0">Para...</span>
+                        <span class="text-gray-300">[valor o beneficio que aporta]</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-purple-900/20 p-5 rounded-xl border border-purple-500/20">
+                    <h4 class="font-bold text-purple-300 mb-2 flex items-center gap-2"><i class="fa-solid fa-clipboard-list"></i> Criterios de Aceptación (DoD)</h4>
+                    <p class="text-sm text-gray-400 mb-3">Son las condiciones que la US debe cumplir para ser aceptada. Se escriben en formato Gherkin:</p>
+                    <ul class="text-sm text-gray-300 space-y-1 list-disc pl-5 italic">
+                        <li><strong>Dado que</strong> [contexto inicial]...</li>
+                        <li><strong>Cuando</strong> [acción del usuario]...</li>
+                        <li><strong>Entonces</strong> [resultado esperado].</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ejemplos -->
+            <div>
+                <div class="flex gap-4 mb-6 border-b border-gray-800 pb-2">
+                    <button onclick="toggleUs('good')" id="btn-good" class="nav-btn active text-lg font-bold pb-2">✅ Ejemplo Correcto</button>
+                    <button onclick="toggleUs('bad')" id="btn-bad" class="nav-btn text-lg font-bold pb-2 text-gray-500">❌ Ejemplo Incorrecto</button>
+                </div>
+
+                <div id="us-good" class="space-y-4 fade-in">
+                    <div class="bg-emerald-900/20 border border-emerald-500/30 p-6 rounded-xl">
+                        <h4 class="text-emerald-400 font-bold mb-4">US-01: Login de Personal Sanitario</h4>
+                        <p class="text-white text-lg leading-relaxed mb-6 font-display">
+                            "<span class="text-purple-300">Como</span> médico del ambulatorio, <span class="text-blue-300">quiero</span> iniciar sesión con mi email y contraseña, <span class="text-emerald-300">para</span> poder acceder a los historiales de mis pacientes de forma segura."
+                        </p>
+                        <div class="bg-gray-900 p-4 rounded-lg">
+                            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Criterios de Aceptación:</span>
+                            <ul class="text-sm text-gray-400 space-y-2">
+                                <li>- <strong>Dado que</strong> estoy en la pantalla de login, <strong>cuando</strong> introduzco credenciales correctas, <strong>entonces</strong> accedo al dashboard.</li>
+                                <li>- <strong>Dado que</strong> intento hacer login, <strong>cuando</strong> introduzco una contraseña errónea, <strong>entonces</strong> veo un mensaje rojo de "Credenciales inválidas".</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="us-bad" class="space-y-4 hidden fade-in">
+                    <div class="bg-rose-900/20 border border-rose-500/30 p-6 rounded-xl">
+                        <h4 class="text-rose-400 font-bold mb-4">US-01: Tarea Técnica (Mal redactada)</h4>
+                        <p class="text-white text-lg leading-relaxed mb-6 font-display line-through opacity-70">
+                            "Hacer la tabla de usuarios en MariaDB con un campo varchar(255) para la contraseña encriptada y un endpoint en Spring Boot que devuelva un JWT."
+                        </p>
+                        <div class="bg-rose-950/50 p-4 rounded-lg border border-rose-900">
+                            <span class="text-xs font-bold text-rose-500 uppercase tracking-wider mb-2 block flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation"></i> ¿Por qué está mal?</span>
+                            <p class="text-sm text-rose-200">
+                                Esto NO es una Historia de Usuario. Es una descripción de tareas técnicas. El usuario no sabe qué es un JWT ni un varchar(255). Las tareas técnicas se derivan de la Historia de Usuario, pero el título y la descripción deben centrarse en el valor para el negocio.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Gestión Ágil (Kanban) -->
+    <section id="gestion" class="pt-10 border-t border-gray-800 scroll-mt-24">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-display font-bold text-white mb-2">Gestión del Proyecto (Tablero Kanban)</h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">Ya sea en Trello, Jira o GitHub Projects, tu herramienta principal será el tablero Kanban. Así debe moverse el flujo de trabajo de vuestras FCT.</p>
+        </div>
+
+        <!-- CSS Kanban Board -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 overflow-x-auto pb-4">
+
+            <!-- Column 1 -->
+            <div class="kanban-col p-4 min-h-[400px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-gray-300 text-sm tracking-wider uppercase flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-gray-500"></span> Backlog
+                    </h3>
+                    <span class="text-xs bg-gray-800 px-2 py-1 rounded text-gray-400">5</span>
+                </div>
+                <div class="space-y-3">
+                    <div class="kanban-card p-3 rounded-lg border-l-gray-500">
+                        <div class="flex gap-2 mb-2">
+                            <span class="text-[10px] bg-sky-900/50 text-sky-400 px-2 py-0.5 rounded">Frontend</span>
+                        </div>
+                        <p class="text-sm text-gray-200 font-medium">US-08: Panel de administrador</p>
+                    </div>
+                    <div class="kanban-card p-3 rounded-lg border-l-gray-500">
+                        <p class="text-sm text-gray-200 font-medium">US-09: Exportar a CSV</p>
+                    </div>
+                    <div class="text-center py-4 text-gray-600 text-sm italic">
+                        El PO prioriza esta lista. Lo de arriba es lo más urgente.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 2 -->
+            <div class="kanban-col p-4 min-h-[400px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-blue-400 text-sm tracking-wider uppercase flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span> To Do (Sprint)
+                    </h3>
+                </div>
+                <div class="space-y-3">
+                    <div class="kanban-card p-3 rounded-lg border-l-blue-500">
+                        <div class="flex gap-2 mb-2">
+                            <span class="text-[10px] bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded">Backend</span>
+                        </div>
+                        <p class="text-sm text-gray-200 font-medium">US-04: API Guardar Reserva</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 3 -->
+            <div class="kanban-col p-4 min-h-[400px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-amber-400 text-sm tracking-wider uppercase flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-amber-500"></span> In Progress
+                    </h3>
+                </div>
+                <div class="space-y-3">
+                    <div class="kanban-card p-3 rounded-lg border-l-amber-500">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-[10px] bg-rose-900/50 text-rose-400 px-2 py-0.5 rounded">BBDD</span>
+                            <div class="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center text-[10px]">JD</div>
+                        </div>
+                        <p class="text-sm text-gray-200 font-medium">US-02: Esquema JSON MongoDB</p>
+                    </div>
+                    <div class="kanban-card p-3 rounded-lg border-l-amber-500">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-[10px] bg-sky-900/50 text-sky-400 px-2 py-0.5 rounded">Frontend</span>
+                            <div class="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center text-[10px]">MR</div>
+                        </div>
+                        <p class="text-sm text-gray-200 font-medium">US-03: Maquetar Login (React)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 4 -->
+            <div class="kanban-col p-4 min-h-[400px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-purple-400 text-sm tracking-wider uppercase flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-purple-500"></span> Testing / QA
+                    </h3>
+                </div>
+                <div class="space-y-3">
+                    <div class="kanban-card p-3 rounded-lg border-l-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-[10px] bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded">Backend</span>
+                        </div>
+                        <p class="text-sm text-gray-200 font-medium">US-01: Autenticación JWT</p>
+                        <div class="mt-3 pt-2 border-t border-gray-700 flex items-center text-xs text-purple-300">
+                            <i class="fa-solid fa-magnifying-glass mr-1"></i> Esperando revisión del PO
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Section 4: Ceremonias -->
+    <section id="ceremonias" class="pt-10 pb-20 border-t border-gray-800 scroll-mt-24">
+        <h2 class="text-3xl font-display font-bold text-white mb-8">Ceremonias Ágiles</h2>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Planning -->
+            <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl relative overflow-hidden group hover:border-blue-500 transition-colors">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-calendar-days text-6xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2 relative z-10">Sprint Planning</h3>
+                <div class="text-blue-400 text-xs font-bold mb-4 uppercase tracking-widest relative z-10">Lunes (Inicio fase)</div>
+                <p class="text-sm text-gray-400 relative z-10">El equipo selecciona qué Historias del Backlog se comprometen a terminar en esta fase. El PO explica las dudas.</p>
+            </div>
+
+            <!-- Daily -->
+            <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl relative overflow-hidden group hover:border-amber-500 transition-colors">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-clock rotate-12 text-6xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2 relative z-10">Daily Stand-up</h3>
+                <div class="text-amber-400 text-xs font-bold mb-4 uppercase tracking-widest relative z-10">Diario (Max 15 min)</div>
+                <p class="text-sm text-gray-400 relative z-10">Sincronización rápida. Cada uno dice: ¿Qué hice ayer? ¿Qué haré hoy? ¿Tengo algún bloqueo?</p>
+            </div>
+
+            <!-- Review -->
+            <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl relative overflow-hidden group hover:border-emerald-500 transition-colors">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-eye text-6xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2 relative z-10">Sprint Review</h3>
+                <div class="text-emerald-400 text-xs font-bold mb-4 uppercase tracking-widest relative z-10">Viernes (Fin fase)</div>
+                <p class="text-sm text-gray-400 relative z-10">Demostración (Demo) del software funcionando. El PO comprueba que cumple los Criterios de Aceptación.</p>
+            </div>
+
+            <!-- Retro -->
+            <div class="bg-gray-900 border border-gray-800 p-6 rounded-xl relative overflow-hidden group hover:border-purple-500 transition-colors">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <i class="fa-solid fa-arrows-rotate text-6xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2 relative z-10">Retrospectiva</h3>
+                <div class="text-purple-400 text-xs font-bold mb-4 uppercase tracking-widest relative z-10">Tras la Review</div>
+                <p class="text-sm text-gray-400 relative z-10">Reunión de mejora continua. ¿Qué ha ido bien? ¿Qué ha ido mal? ¿Cómo mejoramos para la próxima semana?</p>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="border-t border-gray-800 bg-gray-950 py-6 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500">
+        <p>Manual interactivo para roles ágiles en prácticas FCT.</p>
+    </div>
+</footer>
+
+<script>
+    function toggleUs(type) {
+        document.getElementById('btn-good').classList.remove('active', 'text-gray-500');
+        document.getElementById('btn-bad').classList.remove('active', 'text-gray-500');
+
+        document.getElementById('btn-good').classList.add('text-gray-500');
+        document.getElementById('btn-bad').classList.add('text-gray-500');
+
+        document.getElementById('btn-' + type).classList.remove('text-gray-500');
+        document.getElementById('btn-' + type).classList.add('active');
+
+        document.getElementById('us-good').classList.add('hidden');
+        document.getElementById('us-bad').classList.add('hidden');
+
+        const activeEl = document.getElementById('us-' + type);
+        activeEl.classList.remove('hidden');
+        activeEl.classList.remove('fade-in');
+        void activeEl.offsetWidth; // trigger reflow
+        activeEl.classList.add('fade-in');
+    }
+</script>
+</body>
+</html>
