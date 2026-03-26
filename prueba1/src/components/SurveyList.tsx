@@ -98,7 +98,7 @@ export default function SurveyList({
           )}
         </div>
       ) : (
-        {/* Grid de tarjetas de encuestas */}
+        // Grid de tarjetas de encuestas
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredSurveys.map((survey) => (
             <div
